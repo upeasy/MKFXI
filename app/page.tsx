@@ -1,11 +1,14 @@
 "use client";
+
 import { DownloadButton } from "@/components/DownloadButton";
 import { ImageUploader } from "@/components/ImageUploader";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SampleFramesSection } from "@/components/SampleFramesSection";
-import { TransformControls } from "@/components/TransformControls";
+import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import React, { useRef, useState } from "react";
 
 interface ImageTransform {
@@ -55,6 +58,35 @@ export default function HomePage() {
     setIsDragging(false);
   };
 
+  // Handle dragging via touch
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - imageTransform.translateX,
+        y: touch.clientY - imageTransform.translateY,
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging) {
+      const touch = e.touches[0];
+      if (touch) {
+        setImageTransform({
+          ...imageTransform,
+          translateX: touch.clientX - dragStart.x,
+          translateY: touch.clientY - dragStart.y,
+        });
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   // Update transforms
   const updateTransform = (updates: Partial<ImageTransform>) => {
     setImageTransform((prev) => ({ ...prev, ...updates }));
@@ -100,80 +132,49 @@ export default function HomePage() {
     }
   };
 
-  // Canvas drawing logic
-  const drawToCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || !profileImage || !frameImage) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = 500;
-    canvas.height = 500;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const profileImg = new Image();
-    const frameImg = new Image();
-
-    profileImg.onload = () => {
-      frameImg.onload = () => {
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.translate(imageTransform.translateX, imageTransform.translateY);
-        ctx.scale(
-          imageTransform.scale * (imageTransform.flipX ? -1 : 1),
-          imageTransform.scale * (imageTransform.flipY ? -1 : 1)
-        );
-        ctx.rotate((imageTransform.rotation * Math.PI) / 180);
-
-        const aspectRatio = profileImg.width / profileImg.height;
-        let drawWidth = canvas.width;
-        let drawHeight = canvas.height;
-        if (aspectRatio > 1) {
-          drawHeight = canvas.width / aspectRatio;
-        } else {
-          drawWidth = canvas.height * aspectRatio;
-        }
-
-        ctx.drawImage(
-          profileImg,
-          -drawWidth / 2,
-          -drawHeight / 2,
-          drawWidth,
-          drawHeight
-        );
-        ctx.restore();
-
-        ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-      };
-      frameImg.src = frameImage;
-    };
-    profileImg.src = profileImage;
-  };
-
+  // Download handler
   const handleDownload = () => {
-    if (!profileImage || !frameImage) return;
-    drawToCanvas();
-    setTimeout(() => {
-      const link = document.createElement("a");
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      link.href = canvas.toDataURL("image/png");
-      link.download = "framed-profile.png";
-      link.click();
-    }, 100);
+    if (!canvasRef.current) return;
+    const dataURL = canvasRef.current.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = "framed-profile.png";
+    link.click();
   };
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
-            Profile Picture Frame Editor
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="flex items-center justify-center gap-3">
+            <Image
+              src={"/logo.png"}
+              alt={"logo"}
+              width={65}
+              height={65}
+              className="w-fit h-fit object-cover pointer-events-none"
+            />
+
+            <h1
+              className="text-3xl text-start md:text-4xl font-bold text-purple-900 mb-2"
+              style={{ fontFamily: "bd-font, sans-serif" }}
+            >
+              মাতবর কান্দি ফুটবল একাদশ
+            </h1>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-purple-950 mb-2">
+            Profile Photo Maker
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Upload your photo and a frame image (with transparent center) to
-            create framed profile pictures
+            Upload your profile photo, click a frame from below & download!{" "}
+            <br />© 2025, Made with ❤️ by{" "}
+            <Link
+              href="https://www.facebook.com/srb47"
+              className="font-semibold"
+              target="_blank"
+            >
+              Nazmul H. Sourab
+            </Link>
           </p>
         </div>
 
@@ -189,6 +190,10 @@ export default function HomePage() {
                 handleMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
+                handleTouchStart={handleTouchStart}
+                handleTouchMove={handleTouchMove}
+                handleTouchEnd={handleTouchEnd}
+                canvasRef={canvasRef}
               />
               {!profileImage && (
                 <ImageUploader
@@ -207,24 +212,22 @@ export default function HomePage() {
                   }
                 >
                   <input
-                    id={"profile-input"}
+                    id="profile-input"
                     type="file"
                     accept="image/*"
                     onChange={handleProfileUpload}
                     className="hidden"
                   />
-                  <div>
-                    <Button
-                      onClick={() =>
-                        document.getElementById("profile-input")?.click()
-                      }
-                      className="gap-2 "
-                      variant="outline"
-                    >
-                      <Upload className="w-4 h-4" />
-                      {"Profile Image"}
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={() =>
+                      document.getElementById("profile-input")?.click()
+                    }
+                    className="gap-2"
+                    variant="outline"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Profile Image
+                  </Button>
                 </div>
               )}
               {profileImage && frameImage && (
@@ -256,20 +259,12 @@ export default function HomePage() {
 
         {/* Hidden inputs */}
         <input
-          id="profile-input"
-          type="file"
-          accept="image/*"
-          onChange={handleProfileUpload}
-          className="hidden"
-        />
-        <input
           id="frame-input"
           type="file"
           accept="image/*"
           onChange={handleFrameUpload}
           className="hidden"
         />
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
   );

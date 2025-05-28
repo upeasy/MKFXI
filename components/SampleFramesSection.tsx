@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 
 type Props = {
   setFrameImage: (url: string) => void;
@@ -29,9 +30,11 @@ export const SampleFramesSection = ({ setFrameImage }: Props) => {
             onClick={() => setFrameImage(frame.url)}
             className="w-40 h-40 rounded-md overflow-hidden border border-slate-200 hover:border-slate-400 transition-colors cursor-pointer"
           >
-            <img
+            <Image
               src={frame.url}
               alt={frame.name}
+              width={160}
+              height={160}
               className="w-full h-full object-cover pointer-events-none"
             />
           </button>

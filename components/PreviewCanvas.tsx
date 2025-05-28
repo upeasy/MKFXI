@@ -1,5 +1,7 @@
 "use client";
+
 import React, { useEffect, useRef } from "react";
+import Image from "next/image";
 
 interface ImageTransform {
   scale: number;
@@ -18,22 +20,92 @@ type Props = {
   handleMouseDown: (e: React.MouseEvent) => void;
   onMouseMove: (e: React.MouseEvent) => void;
   onMouseUp: (e: React.MouseEvent) => void;
+  handleTouchStart: (e: React.TouchEvent) => void;
+  handleTouchMove: (e: React.TouchEvent) => void;
+  handleTouchEnd: (e: React.TouchEvent) => void;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
 };
 
 export const PreviewCanvas = ({
   profileImage,
   frameImage,
   imageTransform,
+  isDragging,
   handleMouseDown,
   onMouseMove,
   onMouseUp,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd,
+  canvasRef,
 }: Props) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const profileImageRef = useRef<HTMLImageElement | null>(null);
+  const frameImageRef = useRef<HTMLImageElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastProfileImage = useRef<string | null>(null);
+  const lastFrameImage = useRef<string | null>(null);
 
+  // Draw canvas function
+  const drawCanvas = () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw profile image if loaded
+      if (profileImageRef.current) {
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        ctx.translate(imageTransform.translateX, imageTransform.translateY);
+        ctx.scale(
+          imageTransform.scale * (imageTransform.flipX ? -1 : 1),
+          imageTransform.scale * (imageTransform.flipY ? -1 : 1)
+        );
+        ctx.rotate((Math.PI / 180) * imageTransform.rotation);
+
+        const img = profileImageRef.current;
+        const aspectRatio = img.width / img.height;
+        let drawWidth = width;
+        let drawHeight = height;
+
+        if (aspectRatio > 1) {
+          drawHeight = width / aspectRatio;
+        } else {
+          drawWidth = height * aspectRatio;
+        }
+
+        ctx.drawImage(
+          img,
+          -drawWidth / 2,
+          -drawHeight / 2,
+          drawWidth,
+          drawHeight
+        );
+        ctx.restore();
+      }
+
+      // Draw frame image if loaded
+      if (frameImageRef.current) {
+        ctx.drawImage(frameImageRef.current, 0, 0, width, height);
+      }
+    });
+  };
+
+  // Set up canvas and load images
   useEffect(() => {
-    if (!profileImage || !canvasRef.current) return;
-
     const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -43,58 +115,49 @@ export const PreviewCanvas = ({
     canvas.width = width;
     canvas.height = height;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
+    // Load profile image if changed
+    if (profileImage && profileImage !== lastProfileImage.current) {
+      profileImageRef.current = null; // Clear ref to force reload
+      lastProfileImage.current = profileImage;
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.src = profileImage;
+      img.onload = () => {
+        profileImageRef.current = img;
+        drawCanvas();
+      };
+    }
 
-    // Load profile image
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // To avoid tainted canvas issues
-    img.src = profileImage;
+    // Load frame image if changed
+    if (frameImage && frameImage !== lastFrameImage.current) {
+      frameImageRef.current = null; // Clear ref to force reload
+      lastFrameImage.current = frameImage;
+      const frameImg = new window.Image();
+      frameImg.crossOrigin = "anonymous";
+      frameImg.src = frameImage;
+      frameImg.onload = () => {
+        frameImageRef.current = frameImg;
+        drawCanvas();
+      };
+    }
 
-    img.onload = () => {
-      // Save context before transforms
-      ctx.save();
+    // Trigger redraw if either image is already loaded
+    if (profileImageRef.current || frameImageRef.current) {
+      drawCanvas();
+    }
 
-      // Translate to center of canvas
-      ctx.translate(width / 2, height / 2);
-      ctx.translate(imageTransform.translateX, imageTransform.translateY);
-      ctx.scale(
-        imageTransform.scale * (imageTransform.flipX ? -1 : 1),
-        imageTransform.scale * (imageTransform.flipY ? -1 : 1)
-      );
-      ctx.rotate((Math.PI / 180) * imageTransform.rotation);
-
-      // Calculate aspect ratio and draw image
-      const aspectRatio = img.width / img.height;
-      let drawWidth = width;
-      let drawHeight = height;
-
-      if (aspectRatio > 1) {
-        drawHeight = width / aspectRatio;
-      } else {
-        drawWidth = height * aspectRatio;
-      }
-
-      ctx.drawImage(
-        img,
-        -drawWidth / 2,
-        -drawHeight / 2,
-        drawWidth,
-        drawHeight
-      );
-      ctx.restore();
-
-      // Draw frame image on top (if exists)
-      if (frameImage) {
-        const frameImg = new Image();
-        frameImg.crossOrigin = "anonymous";
-        frameImg.src = frameImage;
-        frameImg.onload = () => {
-          ctx.drawImage(frameImg, 0, 0, width, height);
-        };
+    // Cleanup
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [profileImage, frameImage, imageTransform]);
+  }, [profileImage, frameImage]);
+
+  // Redraw canvas when transforms change
+  useEffect(() => {
+    drawCanvas();
+  }, [imageTransform]);
 
   return (
     <div
@@ -102,17 +165,23 @@ export const PreviewCanvas = ({
       onMouseDown={handleMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        touchAction: "none",
+        cursor: isDragging ? "grabbing" : "grab",
+      }}
     >
-      {/* Preview Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-
-      {/* Overlay Frame (optional if needed) */}
       {frameImage && (
-        <img
+        <Image
           src={frameImage}
           alt="Default Frame"
+          fill
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{ objectFit: "cover" }}
+          priority
         />
       )}
     </div>

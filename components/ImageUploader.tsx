@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
 type Props = {
