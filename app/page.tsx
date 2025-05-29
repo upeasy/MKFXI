@@ -6,7 +6,7 @@ import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SampleFramesSection } from "@/components/SampleFramesSection";
 import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, Share2 } from "lucide-react";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 
@@ -137,6 +137,17 @@ export default function HomePage() {
     setIsDownload(true);
   };
 
+  // Facebook share handler
+  const handleFacebookShare = () => {
+    if (canvasRef.current) {
+      const imageData = canvasRef.current.toDataURL("image/png");
+      const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        window.location.href
+      )}&picture=${encodeURIComponent(imageData)}`;
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <div className="min-h-screen isolate bg-slate-50 p-4 md:p-8 relative">
       <div className="absolute inset-0 -z-10 filter brightness-100 contrast-150 bg-[url(/noise.svg)] opacity-35 pointer-events-none" />
@@ -227,6 +238,14 @@ export default function HomePage() {
               {profileImage && frameImage && (
                 <>
                   <DownloadButton onClick={handleDownload} />
+                  <Button
+                    onClick={handleFacebookShare}
+                    variant="outline"
+                    className="gap-2 cursor-pointer"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share to Facebook
+                  </Button>
                   <Button
                     onClick={resetTransforms}
                     variant="outline"
