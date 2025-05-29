@@ -16,7 +16,7 @@ export const SampleFramesSection = ({ setFrameImage, is3DMode }: Props) => {
     },
     {
       name: "Flower Frame",
-      url: "/frame.png",
+      url: "/frame-3d.png",
       type: "3D",
     },
   ];
