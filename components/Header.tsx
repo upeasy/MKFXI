@@ -3,8 +3,8 @@ import React from "react";
 
 const Header = () => {
   return (
-    <nav className="fixed w-full top-0 h-20 z-10 px-5 md:px-0 pt-5">
-      <div className="flex max-w-6xl mx-auto rounded-4xl  bg-white/50 border border-gray-300/50 backdrop-blur-md  items-center justify-center gap-3 py-2 px-2 md:px-0">
+    <nav className="fixed w-full top-0 h-20 z-10">
+      <div className="flex w-full bg-white/30 border-b border-gray-300/50 backdrop-blur-md  items-center justify-center gap-3 py-2 px-2 md:px-0">
         <Image
           src={"/logo.png"}
           alt={"logo"}
@@ -14,7 +14,7 @@ const Header = () => {
         />
 
         <h1
-          className="text-2xl text-start md:text-4xl font-bold text-primary mb-2"
+          className="text-2xl text-start md:text-4xl font-bold text-primary"
           style={{ fontFamily: "bd-font, sans-serif" }}
         >
           মাতবর কান্দি ফুটবল একাদশ

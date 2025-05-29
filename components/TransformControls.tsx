@@ -105,7 +105,7 @@ export default function TransformControls({
       className={`flex flex-col items-center justify-center p-4 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer ${
         variant === "primary"
           ? "bg-purple-800 text-white shadow-lg hover:bg-purple-800"
-          : "bg-white text-purple-800 shadow-md hover:shadow-lg border border-gray-200"
+          : "bg-white text-purple-800 hover:bg-purple-800 hover:text-white shadow-md hover:shadow-lg border border-gray-200"
       }`}
     >
       <Icon className="w-6 h-6 mb-2" />
@@ -161,7 +161,7 @@ export default function TransformControls({
           min={-180}
           max={180}
           step={1}
-          className="mt-2 "
+          className="mt-2 cursor-pointer"
         />
       </div>
     </div>
@@ -172,14 +172,14 @@ export default function TransformControls({
       <div className="flex gap-3">
         <button
           onClick={() => handleZoom(-0.1)}
-          className="flex-1 flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-all duration-200 active:scale-95"
+          className="flex-1 flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md cursor-pointer transition-all hover:text-white duration-200 hover:bg-purple-800 active:scale-95"
         >
           <ZoomOut className="w-5 h-5" />
           <span className="font-medium">Zoom Out</span>
         </button>
         <button
           onClick={() => handleZoom(0.1)}
-          className="flex-1 flex items-center justify-center gap-2 p-4 bg-purple-800 text-white rounded-2xl hover:bg-purple-800 transition-all duration-200 active:scale-95"
+          className="flex-1 flex items-center justify-center gap-2 p-4 bg-white hover:text-white rounded-2xl hover:bg-purple-800 cursor-pointer transition-all duration-200 active:scale-95 border border-gray-200"
         >
           <ZoomIn className="w-5 h-5" />
           <span className="font-medium">Zoom In</span>
@@ -201,14 +201,14 @@ export default function TransformControls({
           min={0.1}
           max={3}
           step={0.05}
-          className="mt-2"
+          className="mt-2 cursor-pointer"
         />
         <div className="flex gap-2 mt-4">
           {[0.5, 1, 1.5, 2].map((scale) => (
             <button
               key={scale}
               onClick={() => updateTransform({ scale })}
-              className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`flex-1 py-2 px-3 rounded-xl cursor-pointer text-sm font-medium transition-all duration-200 ${
                 Math.abs(imageTransform.scale - scale) < 0.05
                   ? "bg-purple-800 text-white"
                   : "bg-white text-purple-800 hover:bg-gray-100"
@@ -242,6 +242,7 @@ export default function TransformControls({
             min={-150}
             max={150}
             step={1}
+            className=" cursor-pointer"
           />
         </div>
         <div className="space-y-3 mt-4">
@@ -257,11 +258,12 @@ export default function TransformControls({
             min={-150}
             max={150}
             step={1}
+            className=" cursor-pointer"
           />
         </div>
         <button
           onClick={() => updateTransform({ translateX: 0, translateY: 0 })}
-          className="w-full mt-4 py-3 bg-white text-purple-800 rounded-xl border border-gray-200 font-medium hover:shadow-md transition-all duration-200 active:scale-95"
+          className="w-full mt-4 py-3 bg-white text-purple-800 hover:text-white rounded-xl border border-gray-200 font-medium hover:shadow-md transition-all duration-200 active:scale-95 cursor-pointer hover:bg-primary"
         >
           Center Image
         </button>

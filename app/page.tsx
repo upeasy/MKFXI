@@ -172,7 +172,7 @@ export default function HomePage() {
           className="mx-auto aspect-1155/678 w-288.75 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
         />
       </div>
-      <div className="max-w-6xl mx-auto pt-28 md:pt-20">
+      <div className="max-w-6xl mx-auto pt-20">
         <div className="text-center mb-8 flex flex-col items-center">
           <h1 className="text-3xl md:text-4xl font-bold text-purple-950 mb-2">
             Profile Photo Maker
