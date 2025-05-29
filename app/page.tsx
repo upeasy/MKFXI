@@ -33,6 +33,7 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDownload, setIsDownload] = useState(false);
 
   // Handle dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -133,33 +134,12 @@ export default function HomePage() {
 
   // Download handler
   const handleDownload = () => {
-    if (!canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const scaleFactor = 4;
-
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = canvas.width * scaleFactor;
-    tempCanvas.height = canvas.height * scaleFactor;
-    const tempCtx = tempCanvas.getContext("2d");
-
-    if (!tempCtx) return;
-
-    tempCtx.scale(scaleFactor, scaleFactor);
-
-    tempCtx.drawImage(canvas, 0, 0);
-
-    const dataURL = tempCanvas.toDataURL("image/png", 2.0);
-
-    // Create download link
-    const link = document.createElement("a");
-    link.href = dataURL;
-    link.download = "mkfxi-framed-profile.png";
-    link.click();
+    setIsDownload(true);
   };
 
   return (
     <div className="min-h-screen isolate bg-slate-50 p-4 md:p-8 relative">
+      <div className="absolute inset-0 -z-10 filter brightness-100 contrast-150 bg-[url(/noise.svg)] opacity-35 pointer-events-none" />
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
@@ -206,6 +186,8 @@ export default function HomePage() {
                 handleTouchMove={handleTouchMove}
                 handleTouchEnd={handleTouchEnd}
                 canvasRef={canvasRef}
+                isDownload={isDownload}
+                setIsDownload={setIsDownload}
               />
               {!profileImage && (
                 <ImageUploader

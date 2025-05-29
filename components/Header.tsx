@@ -14,7 +14,7 @@ const Header = () => {
         />
 
         <h1
-          className="text-2xl text-start md:text-4xl font-bold text-primary"
+          className="text-2xl text-start md:text-4xl text-primary"
           style={{ fontFamily: "bd-font, sans-serif" }}
         >
           মাতবর কান্দি ফুটবল একাদশ

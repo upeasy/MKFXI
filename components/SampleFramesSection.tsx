@@ -12,10 +12,10 @@ export const SampleFramesSection = ({ setFrameImage }: Props) => {
       name: "Flower Frame",
       url: "/frame.png",
     },
-    {
-      name: "Sports Frame",
-      url: "/frame1.png",
-    },
+    // {
+    //   name: "Sports Frame",
+    //   url: "/frame1.png",
+    // },
   ];
 
   return (
