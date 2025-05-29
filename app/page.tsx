@@ -7,7 +7,6 @@ import { SampleFramesSection } from "@/components/SampleFramesSection";
 import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 
