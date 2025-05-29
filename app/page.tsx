@@ -4,9 +4,10 @@ import { DownloadButton } from "@/components/DownloadButton";
 import { ImageUploader } from "@/components/ImageUploader";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SampleFramesSection } from "@/components/SampleFramesSection";
+import ThreeDFrameControl from "@/components/ThreeDFrameControl";
 import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
-import { Upload, Share2 } from "lucide-react";
+import { Box, Image as ImageIcon, Upload } from "lucide-react";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 
@@ -22,6 +23,8 @@ interface ImageTransform {
 export default function HomePage() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [frameImage, setFrameImage] = useState<string | null>(null);
+  const [is3DMode, setIs3DMode] = useState(false);
+  const [frameDepthRatio, setFrameDepthRatio] = useState(0.6);
   const [imageTransform, setImageTransform] = useState<ImageTransform>({
     scale: 0.7,
     rotation: 0,
@@ -34,6 +37,7 @@ export default function HomePage() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDownload, setIsDownload] = useState(false);
+  const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#f3f4f6");
 
   // Handle dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -137,17 +141,6 @@ export default function HomePage() {
     setIsDownload(true);
   };
 
-  // Facebook share handler
-  const handleFacebookShare = () => {
-    if (canvasRef.current) {
-      const imageData = canvasRef.current.toDataURL("image/png");
-      const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        window.location.href
-      )}&picture=${encodeURIComponent(imageData)}`;
-      window.open(shareUrl, "_blank", "noopener,noreferrer");
-    }
-  };
-
   return (
     <div className="min-h-screen isolate bg-slate-50 p-4 md:p-8 relative">
       <div className="absolute inset-0 -z-10 filter brightness-100 contrast-150 bg-[url(/noise.svg)] opacity-35 pointer-events-none" />
@@ -169,8 +162,8 @@ export default function HomePage() {
             Profile Photo Maker
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Upload your profile photo, click a frame from below & download!{" "}
-            <br />© 2025, Made with ❤️ by{" "}
+            Upload your profile photo, choose between 2D or 3D frames, and
+            download! <br />© 2025, Made with ❤️ by{" "}
             <Link
               href="https://www.facebook.com/srb47"
               className="font-semibold"
@@ -184,11 +177,46 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Preview Section */}
           <div className="lg:col-span-2 flex flex-col items-center">
+            {/* Frame Mode Toggle */}
+            <div className="mb-6 bg-white/50 backdrop-blur-md overflow-hidden rounded-3xl shadow-xs p-4">
+              <div className="flex items-center justify-center gap-4">
+                <span className="text-sm font-medium text-slate-600">
+                  Frame Mode:
+                </span>
+                <div className="flex items-center bg-slate-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setIs3DMode(false)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
+                      !is3DMode
+                        ? "bg-white text-purple-700 shadow-sm"
+                        : "text-slate-600 hover:text-slate-800"
+                    }`}
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    2D
+                  </button>
+                  <button
+                    onClick={() => setIs3DMode(true)}
+                    className={`flex items-center cursor-pointer gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                      is3DMode
+                        ? "bg-white text-purple-700 shadow-sm"
+                        : "text-slate-600 hover:text-slate-800"
+                    }`}
+                  >
+                    <Box className="w-4 h-4" />
+                    3D
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="relative">
               <PreviewCanvas
                 profileImage={profileImage}
                 frameImage={frameImage}
                 imageTransform={imageTransform}
+                is3DFrame={is3DMode}
+                frameDepthRatio={frameDepthRatio}
                 isDragging={isDragging}
                 handleMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -199,10 +227,16 @@ export default function HomePage() {
                 canvasRef={canvasRef}
                 isDownload={isDownload}
                 setIsDownload={setIsDownload}
+                canvasBackgroundColor={canvasBackgroundColor}
               />
+
               {!profileImage && (
                 <ImageUploader
-                  label="Upload Your Profile Image"
+                  label={
+                    is3DMode
+                      ? "Upload Your Transparent Profile Image"
+                      : "Upload Your Profile Image"
+                  }
                   inputId="profile-input"
                   onChange={handleProfileUpload}
                 />
@@ -238,14 +272,7 @@ export default function HomePage() {
               {profileImage && frameImage && (
                 <>
                   <DownloadButton onClick={handleDownload} />
-                  <Button
-                    onClick={handleFacebookShare}
-                    variant="outline"
-                    className="gap-2 cursor-pointer"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    Share to Facebook
-                  </Button>
+
                   <Button
                     onClick={resetTransforms}
                     variant="outline"
@@ -257,7 +284,10 @@ export default function HomePage() {
               )}
             </div>
 
-            <SampleFramesSection setFrameImage={setFrameImage} />
+            <SampleFramesSection
+              setFrameImage={setFrameImage}
+              is3DMode={is3DMode}
+            />
           </div>
 
           {/* Controls Panel */}
@@ -266,7 +296,22 @@ export default function HomePage() {
               imageTransform={imageTransform}
               updateTransform={updateTransform}
               resetTransforms={resetTransforms}
+              frameDepthRatio={frameDepthRatio}
+              setFrameDepthRatio={setFrameDepthRatio}
+              canvasBackgroundColor={canvasBackgroundColor}
+              setCanvasBackgroundColor={setCanvasBackgroundColor}
+              is3DMode={is3DMode}
             />
+
+            {/* 3D Frame Controls */}
+            {is3DMode && profileImage && frameImage && (
+              <ThreeDFrameControl
+                frameDepthRatio={frameDepthRatio}
+                setFrameDepthRatio={setFrameDepthRatio}
+                canvasBackgroundColor={canvasBackgroundColor}
+                setCanvasBackgroundColor={setCanvasBackgroundColor}
+              />
+            )}
           </div>
         </div>
 

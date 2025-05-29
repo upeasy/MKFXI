@@ -26,6 +26,9 @@ type Props = {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   isDownload: boolean;
   setIsDownload: React.Dispatch<React.SetStateAction<boolean>>;
+  is3DFrame?: boolean; // New prop to enable 3D frame mode
+  frameDepthRatio?: number; // Ratio to determine where the frame "cuts" the image (0.0 to 1.0)
+  canvasBackgroundColor?: string; // Background color for the canvas
 };
 
 export const PreviewCanvas = ({
@@ -42,6 +45,9 @@ export const PreviewCanvas = ({
   canvasRef,
   isDownload,
   setIsDownload,
+  is3DFrame = false,
+  frameDepthRatio = 0.6, // Default: 60% of image above frame, 40% below
+  canvasBackgroundColor = "#ffffff", // Default white background
 }: Props) => {
   const profileImageRef = useRef<HTMLImageElement | null>(null);
   const frameImageRef = useRef<HTMLImageElement | null>(null);
@@ -66,46 +72,8 @@ export const PreviewCanvas = ({
     // Scale the context to match the high-resolution canvas
     tempCtx.scale(downloadScale, downloadScale);
 
-    // Redraw content on the temporary canvas
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Draw profile image if loaded
-    if (profileImageRef.current) {
-      tempCtx.save();
-      tempCtx.translate(width / 2, height / 2);
-      tempCtx.translate(imageTransform.translateX, imageTransform.translateY);
-      tempCtx.scale(
-        imageTransform.scale * (imageTransform.flipX ? -1 : 1),
-        imageTransform.scale * (imageTransform.flipY ? -1 : 1)
-      );
-      tempCtx.rotate((Math.PI / 180) * imageTransform.rotation);
-
-      const img = profileImageRef.current;
-      const aspectRatio = img.width / img.height;
-      let drawWidth = width;
-      let drawHeight = height;
-
-      if (aspectRatio > 1) {
-        drawHeight = width / aspectRatio;
-      } else {
-        drawWidth = height * aspectRatio;
-      }
-
-      tempCtx.drawImage(
-        img,
-        -drawWidth / 2,
-        -drawHeight / 2,
-        drawWidth,
-        drawHeight
-      );
-      tempCtx.restore();
-    }
-
-    // Draw frame image if loaded
-    if (frameImageRef.current) {
-      tempCtx.drawImage(frameImageRef.current, 0, 0, width, height);
-    }
+    // Redraw content on the temporary canvas using the same draw logic
+    drawCanvasContent(tempCtx, canvas.width, canvas.height);
 
     // Draw credit text in bottom right corner
     tempCtx.font = "8px Arial";
@@ -114,8 +82,8 @@ export const PreviewCanvas = ({
     tempCtx.textAlign = "right";
     tempCtx.fillText(
       "Made with ❤️ by Nazmul H. Sourab",
-      width - 10,
-      height - 10
+      canvas.width - 10,
+      canvas.height - 10
     );
 
     // Download the image
@@ -125,6 +93,93 @@ export const PreviewCanvas = ({
     link.click();
     link.remove();
     tempCanvas.remove();
+  };
+
+  // Separate function to handle the drawing logic for both preview and download
+  const drawCanvasContent = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ) => {
+    // Clear canvas with background color
+    ctx.fillStyle = canvasBackgroundColor;
+    ctx.fillRect(0, 0, width, height);
+
+    if (!is3DFrame) {
+      // Original drawing logic for non-3D frames
+      drawProfileImage(ctx, width, height, false);
+      drawFrameImage(ctx, width, height);
+    } else {
+      // 3D Frame logic: Draw in layers
+
+      // 1. First, draw the lower part of the profile image (behind frame)
+      drawProfileImage(ctx, width, height, true, "lower");
+
+      // 2. Then draw the frame
+      drawFrameImage(ctx, width, height);
+
+      // 3. Finally, draw the upper part of the profile image (in front of frame)
+      drawProfileImage(ctx, width, height, true, "upper");
+    }
+  };
+
+  const drawProfileImage = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    isClipped: boolean = false,
+    clipRegion?: "upper" | "lower"
+  ) => {
+    if (!profileImageRef.current) return;
+
+    ctx.save();
+
+    // Apply clipping for 3D effect
+    if (isClipped && clipRegion) {
+      const clipY = height * frameDepthRatio;
+
+      ctx.beginPath();
+      if (clipRegion === "upper") {
+        // Clip to show only the upper part (head and shoulders)
+        ctx.rect(0, 0, width, clipY);
+      } else {
+        // Clip to show only the lower part
+        ctx.rect(0, clipY, width, height - clipY);
+      }
+      ctx.clip();
+    }
+
+    ctx.translate(width / 2, height / 2);
+    ctx.translate(imageTransform.translateX, imageTransform.translateY);
+    ctx.scale(
+      imageTransform.scale * (imageTransform.flipX ? -1 : 1),
+      imageTransform.scale * (imageTransform.flipY ? -1 : 1)
+    );
+    ctx.rotate((Math.PI / 180) * imageTransform.rotation);
+
+    const img = profileImageRef.current;
+    const aspectRatio = img.width / img.height;
+    let drawWidth = width;
+    let drawHeight = height;
+
+    if (aspectRatio > 1) {
+      drawHeight = width / aspectRatio;
+    } else {
+      drawWidth = height * aspectRatio;
+    }
+
+    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+
+    ctx.restore();
+  };
+
+  const drawFrameImage = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ) => {
+    if (!frameImageRef.current) return;
+    ctx.drawImage(frameImageRef.current, 0, 0, width, height);
   };
 
   // Draw canvas function
@@ -141,45 +196,7 @@ export const PreviewCanvas = ({
       const width = canvas.width;
       const height = canvas.height;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw profile image if loaded
-      if (profileImageRef.current) {
-        ctx.save();
-        ctx.translate(width / 2, height / 2);
-        ctx.translate(imageTransform.translateX, imageTransform.translateY);
-        ctx.scale(
-          imageTransform.scale * (imageTransform.flipX ? -1 : 1),
-          imageTransform.scale * (imageTransform.flipY ? -1 : 1)
-        );
-        ctx.rotate((Math.PI / 180) * imageTransform.rotation);
-
-        const img = profileImageRef.current;
-        const aspectRatio = img.width / img.height;
-        let drawWidth = width;
-        let drawHeight = height;
-
-        if (aspectRatio > 1) {
-          drawHeight = width / aspectRatio;
-        } else {
-          drawWidth = height * aspectRatio;
-        }
-
-        ctx.drawImage(
-          img,
-          -drawWidth / 2,
-          -drawHeight / 2,
-          drawWidth,
-          drawHeight
-        );
-        ctx.restore();
-      }
-
-      // Draw frame image if loaded
-      if (frameImageRef.current) {
-        ctx.drawImage(frameImageRef.current, 0, 0, width, height);
-      }
+      drawCanvasContent(ctx, width, height);
     });
   };
 
@@ -239,7 +256,7 @@ export const PreviewCanvas = ({
   // Redraw canvas when transforms change
   useEffect(() => {
     drawCanvas();
-  }, [imageTransform]);
+  }, [imageTransform, is3DFrame, frameDepthRatio, canvasBackgroundColor]);
 
   useEffect(() => {
     if (isDownload) {
@@ -250,20 +267,28 @@ export const PreviewCanvas = ({
 
   return (
     <div
-      className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-white shadow-lg rounded-full overflow-hidden mx-auto transition-all duration-300 ease-in"
+      className={`relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] shadow-lg rounded-full overflow-hidden mx-auto transition-all duration-300 ease-in ${
+        is3DFrame ? "shadow-2xl transform perspective-1000" : ""
+      }`}
+      style={{
+        backgroundColor: canvasBackgroundColor,
+        borderColor: canvasBackgroundColor,
+        borderWidth: "2px",
+        borderStyle: "solid",
+        touchAction: "none",
+        cursor: isDragging ? "grabbing" : "grab",
+      }}
       onMouseDown={handleMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{
-        touchAction: "none",
-        cursor: isDragging ? "grabbing" : "grab",
-      }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-      {frameImage && (
+
+      {/* Only show the overlay frame image for non-3D mode */}
+      {frameImage && !is3DFrame && (
         <Image
           src={frameImage}
           alt="Default Frame"
@@ -271,6 +296,17 @@ export const PreviewCanvas = ({
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{ objectFit: "cover" }}
           priority
+        />
+      )}
+
+      {/* Add depth indicator for 3D frames */}
+      {is3DFrame && (
+        <div
+          className="absolute left-0 right-0 border-t-2 border-dashed border-blue-300 opacity-30 pointer-events-none"
+          style={{
+            top: `${frameDepthRatio * 100}%`,
+            transition: "top 0.3s ease",
+          }}
         />
       )}
     </div>
