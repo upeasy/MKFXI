@@ -49,7 +49,6 @@ export const PreviewCanvas = ({
   const lastProfileImage = useRef<string | null>(null);
   const lastFrameImage = useRef<string | null>(null);
 
-  // Download canvas as high-quality image
   const downloadCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -192,24 +191,15 @@ export const PreviewCanvas = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set high-resolution canvas size
-    const pixelRatio =
-      typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-    const displaySize = 400; // Display size in CSS pixels
-    const canvasSize = displaySize * pixelRatio; // Actual canvas resolution
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    // Scale the context to account for pixel ratio
-    ctx.scale(pixelRatio, pixelRatio);
-
-    // Set CSS size to maintain display size
-    canvas.style.width = `${displaySize}px`;
-    canvas.style.height = `${displaySize}px`;
+    // Set fixed size for canvas
+    const width = 400;
+    const height = 400;
+    canvas.width = width;
+    canvas.height = height;
 
     // Load profile image if changed
     if (profileImage && profileImage !== lastProfileImage.current) {
-      profileImageRef.current = null;
+      profileImageRef.current = null; // Clear ref to force reload
       lastProfileImage.current = profileImage;
       const img = new window.Image();
       img.crossOrigin = "anonymous";
@@ -222,7 +212,7 @@ export const PreviewCanvas = ({
 
     // Load frame image if changed
     if (frameImage && frameImage !== lastFrameImage.current) {
-      frameImageRef.current = null;
+      frameImageRef.current = null; // Clear ref to force reload
       lastFrameImage.current = frameImage;
       const frameImg = new window.Image();
       frameImg.crossOrigin = "anonymous";
