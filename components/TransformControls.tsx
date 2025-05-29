@@ -10,6 +10,7 @@ import {
   ZoomIn,
   ZoomOut,
   X,
+  Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -338,15 +339,15 @@ export default function TransformControls({
           onClick={() => setIsDrawerOpen(true)}
           className="fixed bottom-4 right-4 sm:hidden bg-purple-800 text-white p-4 rounded-full shadow-lg hover:bg-purple-800 transition-all duration-200 z-50"
         >
-          <Move className="w-6 h-6" />
+          <Settings className="w-6 h-6" />
         </button>
       )}
       {/* Drawer for Mobile */}
       {isMobile && renderDrawer()}
       {/* Original Layout for Non-Mobile */}
       {!isMobile && (
-        <div className="w-full max-w-sm mx-auto bg-white">
-          <div className="flex gap-2 p-4 bg-gray-50 border-b">
+        <div className="w-full max-w-sm mx-auto bg-white/50 backdrop-blur-md overflow-hidden rounded-3xl shadow-xs">
+          <div className="flex gap-2 p-4 bg-gray-50/50 border-b">
             <TabButton
               id="transform"
               icon={RotateCw}
@@ -374,7 +375,7 @@ export default function TransformControls({
             {activeTab === "scale" && renderScaleTab()}
             {activeTab === "position" && renderPositionTab()}
           </div>
-          <div className="p-4 border-t bg-gray-50">
+          <div className="p-4 border-t bg-gray-50/50">
             <button
               onClick={resetTransforms}
               className="w-full py-3 cursor-pointer bg-amber-600 text-white rounded-2xl font-medium hover:bg-amber-500 transition-all duration-200 active:scale-95"

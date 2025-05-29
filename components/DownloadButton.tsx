@@ -8,7 +8,7 @@ type Props = {
 
 export const DownloadButton = ({ onClick }: Props) => {
   return (
-    <Button onClick={onClick} className="gap-2">
+    <Button onClick={onClick} className="gap-2 cursor-pointer">
       <Download className="w-4 h-4" />
       Download
     </Button>

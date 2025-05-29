@@ -135,33 +135,46 @@ export default function HomePage() {
   // Download handler
   const handleDownload = () => {
     if (!canvasRef.current) return;
-    const dataURL = canvasRef.current.toDataURL("image/png");
+
+    const canvas = canvasRef.current;
+    const scaleFactor = 4;
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = canvas.width * scaleFactor;
+    tempCanvas.height = canvas.height * scaleFactor;
+    const tempCtx = tempCanvas.getContext("2d");
+
+    if (!tempCtx) return;
+
+    tempCtx.scale(scaleFactor, scaleFactor);
+
+    tempCtx.drawImage(canvas, 0, 0);
+
+    const dataURL = tempCanvas.toDataURL("image/png", 2.0);
+
+    // Create download link
     const link = document.createElement("a");
     link.href = dataURL;
-    link.download = "framed-profile.png";
+    link.download = "mkfxi-framed-profile.png";
     link.click();
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen isolate bg-slate-50 p-4 md:p-8 relative">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
+      >
+        <div
+          style={{
+            clipPath:
+              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+          }}
+          className="mx-auto aspect-1155/678 w-288.75 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
+        />
+      </div>
+      <div className="max-w-6xl mx-auto pt-28 md:pt-20">
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="flex items-center justify-center gap-3">
-            <Image
-              src={"/logo.png"}
-              alt={"logo"}
-              width={65}
-              height={65}
-              className="w-fit h-fit object-cover pointer-events-none"
-            />
-
-            <h1
-              className="text-3xl text-start md:text-4xl font-bold text-purple-900 mb-2"
-              style={{ fontFamily: "bd-font, sans-serif" }}
-            >
-              মাতবর কান্দি ফুটবল একাদশ
-            </h1>
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-purple-950 mb-2">
             Profile Photo Maker
           </h1>
@@ -222,7 +235,7 @@ export default function HomePage() {
                     onClick={() =>
                       document.getElementById("profile-input")?.click()
                     }
-                    className="gap-2"
+                    className="gap-2 cursor-pointer"
                     variant="outline"
                   >
                     <Upload className="w-4 h-4" />
@@ -236,7 +249,7 @@ export default function HomePage() {
                   <Button
                     onClick={resetTransforms}
                     variant="outline"
-                    className="gap-2"
+                    className="gap-2 cursor-pointer"
                   >
                     Reset
                   </Button>
