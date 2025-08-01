@@ -7,7 +7,10 @@ import { SampleFramesSection } from "@/components/SampleFramesSection";
 import ThreeDFrameControl from "@/components/ThreeDFrameControl";
 import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
+import PWAInstaller from "@/components/PWAInstaller";
+import OfflineIndicator from "@/components/OfflineIndicator";
 import { Box, Image as ImageIcon, Upload } from "lucide-react";
+import Link from "next/link";
 import React, { useRef, useState } from "react";
 
 interface ImageTransform {
@@ -142,6 +145,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen isolate bg-slate-50 p-4 md:p-8 relative">
+      <PWAInstaller />
+      <OfflineIndicator />
       <div className="absolute inset-0 -z-10 filter brightness-100 contrast-150 bg-[url(/noise.svg)] opacity-35 pointer-events-none" />
       <div
         aria-hidden="true"
@@ -156,7 +161,7 @@ export default function HomePage() {
         />
       </div>
       <div className="max-w-6xl mx-auto pt-20">
-       
+      
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Preview Section */}
