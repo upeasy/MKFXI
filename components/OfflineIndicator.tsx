@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { WifiOff, Wifi } from "lucide-react";
+import { WifiOff } from "lucide-react";
 
 export default function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(true);
@@ -33,13 +33,13 @@ export default function OfflineIndicator() {
   if (!showOfflineMessage) {
     return null;
   }
-
+console.log(isOnline);
   return (
     <div className="fixed top-20 left-4 right-4 md:left-auto md:right-4 md:max-w-sm bg-amber-50 border border-amber-200 rounded-lg p-3 z-50 animate-in slide-in-from-top-2">
       <div className="flex items-center gap-2">
         <WifiOff className="w-5 h-5 text-amber-600" />
         <div>
-          <p className="text-sm font-medium text-amber-800">You're offline</p>
+          <p className="text-sm font-medium text-amber-800">{"You're offline"}</p>
           <p className="text-xs text-amber-700">
             The app will continue to work with cached content
           </p>
