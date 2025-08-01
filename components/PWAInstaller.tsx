@@ -21,13 +21,20 @@ export default function PWAInstaller() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    setHasMounted(true);
+
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isInWebAppiOS = (navigator as NavigatorStandalone).standalone === true;
 
     if (isStandalone || isInWebAppiOS) {
       setIsInstalled(true);
+      return;
+    }
+
+    if (sessionStorage.getItem('pwa-install-dismissed')) {
       return;
     }
 
@@ -69,14 +76,12 @@ export default function PWAInstaller() {
 
   const handleDismiss = () => {
     setShowInstallBanner(false);
-    sessionStorage.setItem('pwa-install-dismissed', 'true');
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem('pwa-install-dismissed', 'true');
+    }
   };
 
-  if (isInstalled || sessionStorage.getItem('pwa-install-dismissed')) {
-    return null;
-  }
-
-  if (!showInstallBanner || !deferredPrompt) {
+  if (!hasMounted || isInstalled || !showInstallBanner || !deferredPrompt) {
     return null;
   }
 
