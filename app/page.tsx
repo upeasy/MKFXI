@@ -8,7 +8,6 @@ import ThreeDFrameControl from "@/components/ThreeDFrameControl";
 import TransformControls from "@/components/TransformControls";
 import { Button } from "@/components/ui/button";
 import { Box, Image as ImageIcon, Upload } from "lucide-react";
-import Link from "next/link";
 import React, { useRef, useState } from "react";
 
 interface ImageTransform {
