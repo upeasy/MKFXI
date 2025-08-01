@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import PWAInstaller from "@/components/PWAInstaller";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Box, Image as ImageIcon, Upload } from "lucide-react";
-import Link from "next/link";
 import React, { useRef, useState } from "react";
 
 interface ImageTransform {
