@@ -80,11 +80,7 @@ export const PreviewCanvas = ({
     tempCtx.fillStyle = "white";
     tempCtx.textBaseline = "bottom";
     tempCtx.textAlign = "right";
-    tempCtx.fillText(
-      "Made with ❤️ by Nazmul H. Sourab",
-      canvas.width - 10,
-      canvas.height - 10
-    );
+   
 
     // Download the image
     const link = document.createElement("a");
