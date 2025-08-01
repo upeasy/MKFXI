@@ -15,6 +15,11 @@ export const SampleFramesSection = ({ setFrameImage, is3DMode }: Props) => {
       type: "2D",
     },
     {
+      name: "Avijat Frame",
+      url: "/frame-2d-1.png",
+      type: "2D",
+    },
+    {
       name: "Flower Frame",
       url: "/frame-3d.png",
       type: "3D",
