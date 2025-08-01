@@ -157,22 +157,7 @@ export default function HomePage() {
         />
       </div>
       <div className="max-w-6xl mx-auto pt-20">
-        <div className="text-center mb-8 flex flex-col items-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-purple-950 mb-2">
-            Profile Photo Maker
-          </h1>
-          <p className="text-slate-600 max-w-2xl mx-auto">
-            Upload your profile photo, choose between 2D or 3D frames, and
-            download! <br />© 2025, Made with ❤️ by{" "}
-            <Link
-              href="https://www.facebook.com/srb47"
-              className="font-semibold"
-              target="_blank"
-            >
-              Nazmul H. Sourab
-            </Link>
-          </p>
-        </div>
+       
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Preview Section */}
