@@ -267,7 +267,7 @@ export const PreviewCanvas = ({
 
   return (
     <div
-      className={`relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] shadow-lg rounded-full overflow-hidden mx-auto transition-all duration-300 ease-in ${
+      className={`relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] shadow-lg overflow-hidden mx-auto transition-all duration-300 ease-in ${
         is3DFrame ? "shadow-2xl transform perspective-1000" : ""
       }`}
       style={{

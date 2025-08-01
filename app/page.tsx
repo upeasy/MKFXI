@@ -26,7 +26,7 @@ export default function HomePage() {
   const [is3DMode, setIs3DMode] = useState(false);
   const [frameDepthRatio, setFrameDepthRatio] = useState(0.6);
   const [imageTransform, setImageTransform] = useState<ImageTransform>({
-    scale: 0.7,
+    scale: 1,
     rotation: 0,
     flipX: false,
     flipY: false,
@@ -99,7 +99,7 @@ export default function HomePage() {
   // Reset all transformations
   const resetTransforms = () => {
     setImageTransform({
-      scale: 0.7,
+      scale: 1,
       rotation: 0,
       flipX: false,
       flipY: false,
@@ -151,7 +151,7 @@ export default function HomePage() {
         <div
           style={{
             clipPath:
-              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 81% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
           }}
           className="mx-auto aspect-1155/678 w-288.75 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
         />
