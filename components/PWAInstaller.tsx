@@ -13,33 +13,33 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+interface NavigatorStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 export default function PWAInstaller() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Check if app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isInWebAppiOS = (window.navigator as unknown).standalone === true;
-    
+    const isInWebAppiOS = (navigator as NavigatorStandalone).standalone === true;
+
     if (isStandalone || isInWebAppiOS) {
       setIsInstalled(true);
       return;
     }
 
-    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
-      // Show install banner after a short delay
+
       setTimeout(() => {
         setShowInstallBanner(true);
       }, 3000);
     };
 
-    // Listen for app installed event
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setShowInstallBanner(false);
@@ -60,7 +60,7 @@ export default function PWAInstaller() {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
       setShowInstallBanner(false);
@@ -69,11 +69,9 @@ export default function PWAInstaller() {
 
   const handleDismiss = () => {
     setShowInstallBanner(false);
-    // Don't show again for this session
     sessionStorage.setItem('pwa-install-dismissed', 'true');
   };
 
-  // Don't show if already installed or dismissed this session
   if (isInstalled || sessionStorage.getItem('pwa-install-dismissed')) {
     return null;
   }
@@ -90,12 +88,12 @@ export default function PWAInstaller() {
       >
         <X className="w-4 h-4 text-gray-500" />
       </button>
-      
+
       <div className="flex items-start gap-3">
         <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
           <Download className="w-6 h-6 text-purple-600" />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-gray-900 text-sm mb-1">
             Install MKFXI App
@@ -103,7 +101,7 @@ export default function PWAInstaller() {
           <p className="text-gray-600 text-xs mb-3 leading-relaxed">
             Add to your home screen for quick access and offline use
           </p>
-          
+
           <div className="flex gap-2">
             <Button
               onClick={handleInstallClick}
